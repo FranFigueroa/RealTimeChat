@@ -1,14 +1,33 @@
+const express  = require ('express');
 const http = require('http');
- 
-const hostname = '127.0.0.1';
-const port = 3000;
- 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World');
+const socketIo = require ('socket.io');
+
+const app = express();
+const server = http.createServer();
+const io = socketIo(server);
+
+//configuracion ruta archivos estaticos 
+app.use(express.static(__dirname + '/public'));
+
+//maneja las conexiones socket.io
+io.on('connection', (socketz) => {
+    console.log('Usuario conectado');
 });
- 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+
+//maneja los mensajes del chat
+socketIo.on('chat message', (msg) =>{
+    io.emit('chat message',msg) //emite el mensaje a todos los clientes
 });
+
+//maneja las desconexiones de usuarios
+socketIo.on('disconect', () =>{
+    console.log('Usuario desconectado');
+});
+
+//inica el servidor en el puerto 3000
+
+server.listen(3000, () =>{
+    console.log('Servidor escuchando en http://localhost:3000');
+});
+
+
